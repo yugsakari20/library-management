@@ -4,7 +4,6 @@ import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Public: list and search
 router.get("/", async (req, res) => {
   const { q } = req.query;
   const query = q
@@ -14,7 +13,6 @@ router.get("/", async (req, res) => {
   res.json(books);
 });
 
-// Admin: create
 router.post("/", requireAuth, requireAdmin, async (req, res) => {
   const { title, author, isbn, copies } = req.body;
   if (!title || !author) return res.status(400).json({ message: "Title and author required" });
@@ -22,14 +20,14 @@ router.post("/", requireAuth, requireAdmin, async (req, res) => {
   res.status(201).json(book);
 });
 
-// Admin: update
+
 router.put("/:id", requireAuth, requireAdmin, async (req, res) => {
   const book = await Book.findByIdAndUpdate(req.params.id, req.body, { new: true });
   if (!book) return res.status(404).json({ message: "Book not found" });
   res.json(book);
 });
 
-// Admin: delete
+
 router.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
   const book = await Book.findByIdAndDelete(req.params.id);
   if (!book) return res.status(404).json({ message: "Book not found" });

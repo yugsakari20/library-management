@@ -5,7 +5,6 @@ import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// User: borrow a book
 router.post("/borrow/:bookId", requireAuth, async (req, res) => {
   const { bookId } = req.params;
   const book = await Book.findById(bookId);
@@ -18,7 +17,6 @@ router.post("/borrow/:bookId", requireAuth, async (req, res) => {
   res.status(201).json(loan);
 });
 
-// User: return a book
 router.post("/return/:loanId", requireAuth, async (req, res) => {
   const loan = await Loan.findById(req.params.loanId).populate("book");
   if (!loan) return res.status(404).json({ message: "Loan not found" });
@@ -34,7 +32,6 @@ router.post("/return/:loanId", requireAuth, async (req, res) => {
   res.json(loan);
 });
 
-// User/Admin: list my loans or all (admin)
 router.get("/", requireAuth, async (req, res) => {
   const filter = req.user.role === "admin" ? {} : { user: req.user._id };
   const loans = await Loan.find(filter).populate("book").populate("user", "name email role").sort({ createdAt: -1 });

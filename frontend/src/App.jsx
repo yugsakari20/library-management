@@ -1,24 +1,23 @@
 import { useEffect, useState } from "react";
-import { Routes, Route, Link, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Books from "./pages/Books.jsx";
 import AdminBooks from "./pages/AdminBooks.jsx";
 import Loans from "./pages/Loans.jsx";
-
+import Home from "./pages/Home.jsx"; // ⬅️ import Home
+import { jwtDecode } from "jwt-decode"; // ⬅️ add this if missing
 
 function getUserFromToken() {
   const t = localStorage.getItem("token");
   if (!t) return null;
   try {
     const decoded = jwtDecode(t);
-    // naive expiry check
     if (decoded.exp * 1000 < Date.now()) {
       localStorage.removeItem("token");
       return null;
     }
-    // role is not in token; we fetch from localStorage shadow when login/register
     const userStr = localStorage.getItem("user");
     return userStr ? JSON.parse(userStr) : null;
   } catch {
@@ -30,7 +29,6 @@ export default function App() {
   const [user, setUser] = useState(getUserFromToken());
 
   useEffect(() => {
-    // Keep user shadow for role persistence across reloads
     const handler = () => {
       const u = localStorage.getItem("user");
       setUser(u ? JSON.parse(u) : null);
@@ -54,18 +52,7 @@ export default function App() {
     <div>
       <Navbar user={user} onLogout={logout} />
       <Routes>
-        <Route path="/" element={
-          <div className="container py-10">
-            <div className="card">
-              <h1 className="text-2xl font-semibold">Welcome to the Library 📚</h1>
-              <p className="mt-2">Browse books, borrow and return, and manage inventory (admin).</p>
-              <div className="mt-4 flex gap-3">
-                <Link to="/books" className="btn btn-primary">Explore Books</Link>
-                {user?.role === "admin" && <Link to="/admin/books" className="btn">Manage Books</Link>}
-              </div>
-            </div>
-          </div>
-        } />
+        <Route path="/" element={<Home user={user} />} /> {/* ✅ New Home page */}
         <Route path="/books" element={<Books user={user} />} />
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login setUser={handleSetUser} />} />
         <Route path="/register" element={user ? <Navigate to="/" /> : <Register setUser={handleSetUser} />} />
